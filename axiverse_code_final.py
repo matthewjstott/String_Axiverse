@@ -46,7 +46,7 @@ log_ula_alpha = -1
 ula_theta = 1.1
 
 Model_control = 3
-
+distributions = ['uniform','normal','beta','gamma','lognormal','poisson','weibull','laplace','exponential','chisquare']
 if Model_control == 1:
 
 #######################################################################################################################
@@ -87,6 +87,8 @@ if Model_control == 1:
 
 
 	log_ulasector_lower_mass, log_ulasector_upper_mass, log_ulasector_lower_alpha, log_ulasector_upper_alpha, ula_theta_range = -35,-10,-2,-0.5,3.14
+	#log_ulasector_lower_mass, log_ulasector_upper_mass, log_ulasector_lower_alpha, log_ulasector_upper_alpha, ula_theta_range = functions.scale_invariant_hyperpriors(distributions,[1,1,1],[1,1,1],[1,1,1],[1,1,1],np.pi)
+
 	prior_mass, prior_decay, prior_theta = uniform_prior_functions(log_ulasector_lower_mass, log_ulasector_upper_mass, log_ulasector_lower_alpha, log_ulasector_upper_alpha, ula_theta_range)
 
 
@@ -136,7 +138,13 @@ if Model_control == 2:
 
 		return 10**ula_mass*functions.posterior(10**ula_decay_constant,(10**ula_mass)/H0_eV,ula_theta,3)*decay_fit_mtheory(ula_decay_constant)*prior_mu(fit_params_mass,ula_mass)*prior_theta(fit_params_phi,ula_theta)
 
-
+	
+	
+	
+	#hyperparameterisation
+	#n,beta,a0,sa,b0,sb,F,Lambda,smin,smax,Ntildemax,phi_range = functions.mtheory_hyperpriors(distributions,10,[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],np.pi)
+	accuracy=100
+	#fixed values
 	accuracy,n,beta,a0,sa,b0,sb,F,Lambda,smin,smax,Ntildemax,phi_range = 100,10,1.0,1.,2.,10.,21.,10**105,1.,10.,100.,0.8,3.14159265359
 
 	ma_array, fef, phiin_array, vol = functions.diag_mtheory(n,beta,a0,sa,b0,sb,F,Lambda,smin,smax,Ntildemax)
@@ -162,7 +170,9 @@ if Model_control == 3:
 ############## RMT  Model
 #######################################################################################################################
 
-	betaK,betaM,a0,b0,n,accuracy,phi_range = 1.0,1.0,0.1,0.1,20,100,3.14159265359
+	#n,betaK,betaM,a0,b0,phi_range = functions.matrix_theory_hyperpriors(distributions,10,[1,1,1],[1,1,1],[1,1,1],[1,1,1],np.phi)
+	accuracy = 100
+	n,betaK,betaM,a0,b0,accuracy,phi_range = 1.0,1.0,0.1,0.1,20,100,3.14159265359
 
 	#######################################################################################################################
 	############## Dependant Analysis
