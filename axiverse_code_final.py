@@ -53,13 +53,11 @@ if Model_control == 1:
 ##### String axiverse conjecture scale inveriance
 #######################################################################################################################
 
-	def uniform_prior_functions(log_ulasector_lower_mass, log_ulasector_upper_mass, log_ulasector_lower_alpha, log_ulasector_upper_alpha, ula_theta_range):
+	def uniform_prior_functions(hyperparameters):
+		log_ulasector_lower_mass, log_ulasector_upper_mass, log_ulasector_lower_alpha, log_ulasector_upper_alpha, ula_theta_range = hyperparameters
 		rv_mass = uniform(np.abs(log_ulasector_upper_mass),np.abs(log_ulasector_lower_mass))
 		rv_decay = uniform( np.abs(log_ulasector_upper_alpha),np.abs(log_ulasector_lower_alpha))
 		rv_theta = uniform(0,ula_theta_range)
-		print(rv_mass)
-		print(rv_decay)
-		print(rv_theta)
 		return rv_mass, rv_decay, rv_theta
 
 	def	uniform_prior(ula_decay_constant,ula_mass,ula_theta):
@@ -73,26 +71,20 @@ if Model_control == 1:
 		print('Performing integration....[Log-flat Model]')
 		H0_eV = 1.4e-33
 		value = ula_decay_constant,ula_mass,ula_theta,10**ula_mass*functions.posterior(10**ula_decay_constant,(10**ula_mass)/H0_eV,ula_theta,3)*uniform_prior(ula_decay_constant,ula_mass,ula_theta)[0]*uniform_prior(ula_decay_constant,ula_mass,ula_theta)[1]*uniform_prior(ula_decay_constant,ula_mass,ula_theta)[2]
-
 		st=str(ula_decay_constant)
 		st2=str(ula_mass)
 		st3=str(ula_theta)
 		st4=str(value[3])
-
 		with open("output.txt", "a") as myfile:
 			myfile.write(st+','+st2+','+st3+','+st4+'\n' )
 
-
 		return 10**ula_mass*functions.posterior(10**ula_decay_constant,(10**ula_mass)/H0_eV,ula_theta,3)*uniform_prior(ula_decay_constant,ula_mass,ula_theta)[0]*uniform_prior(ula_decay_constant,ula_mass,ula_theta)[1]*uniform_prior(ula_decay_constant,ula_mass,ula_theta)[2]
 
-
-	log_ulasector_lower_mass, log_ulasector_upper_mass, log_ulasector_lower_alpha, log_ulasector_upper_alpha, ula_theta_range = -35,-10,-2,-0.5,3.14
-	#log_ulasector_lower_mass, log_ulasector_upper_mass, log_ulasector_lower_alpha, log_ulasector_upper_alpha, ula_theta_range = functions.scale_invariant_hyperpriors(distributions,[1,1,1],[1,1,1],[1,1,1],[1,1,1],np.pi)
-
-	prior_mass, prior_decay, prior_theta = uniform_prior_functions(log_ulasector_lower_mass, log_ulasector_upper_mass, log_ulasector_lower_alpha, log_ulasector_upper_alpha, ula_theta_range)
-
-
-	test = posterior_times_prior_scale_invariance(log_ula_alpha, log_ula_mass,ula_theta)
+	
+	hyperprior_vector = [-35,-10,-2,-0.5,3.14]
+	hyperparameters=functions.hyperpriors(distributions,hyperprior_vector)
+	prior_mass, prior_decay, prior_theta = uniform_prior_functions(hyperparameters)
+	test = posterior_times_prior(log_ula_alpha, log_ula_mass,ula_theta)
 	print(test)
 
 if Model_control == 2:
@@ -138,28 +130,21 @@ if Model_control == 2:
 
 		return 10**ula_mass*functions.posterior(10**ula_decay_constant,(10**ula_mass)/H0_eV,ula_theta,3)*decay_fit_mtheory(ula_decay_constant)*prior_mu(fit_params_mass,ula_mass)*prior_theta(fit_params_phi,ula_theta)
 
-	
-	
-	
 	#hyperparameterisation
-	#n,beta,a0,sa,b0,sb,F,Lambda,smin,smax,Ntildemax,phi_range = functions.mtheory_hyperpriors(distributions,10,[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],np.pi)
 	accuracy=100
-	#fixed values
-	accuracy,n,beta,a0,sa,b0,sb,F,Lambda,smin,smax,Ntildemax,phi_range = 100,10,1.0,1.,2.,10.,21.,10**105,1.,10.,100.,0.8,3.14159265359
-
-	ma_array, fef, phiin_array, vol = functions.diag_mtheory(n,beta,a0,sa,b0,sb,F,Lambda,smin,smax,Ntildemax)
-	count, totalcount, lma_array, lf_array, volumelist, initial_phi = functions.spectra(n,beta,a0,sa,b0,sb,F,Lambda,smin,smax,Ntildemax,phi_range,accuracy)
-
-
+	hyperprior_vector = [10,1.0,1.,2.,10.,21.,10**105,1.,10.,100.,0.8,3.14159265359]
+	#hyperprior_vector = [10,[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],np.pi]
+	hyperparameters=functions.hyperpriors(distributions,hyperprior_vector)
+	#ma_array, fef, phiin_array, vol = functions.diag_mtheory(hyperprior_vector)
+	count, totalcount, lma_array, lf_array, volumelist, initial_phi = functions.spectra(hyperparameters,accuracy)
 	fit_params_vol, fit_params_mass, fit_params_phi = functions.pdf_fit_mtheory(volumelist,lma_array,initial_phi)
 
 	##### Determination of prior values
-
 	prior_alpha_function = functions.decay_fit_mtheory(lf_array, 1000, log_ula_alpha)
 	prior_mu_function = functions.prior_mu(fit_params_mass, log_ula_mass)
 	prior_theta_function = functions.prior_theta(initial_phi,ula_theta)
 
-	posterior_times_prior_mtheory(log_ula_alpha,log_ula_mass,ula_theta)
+	posterior_times_prior(log_ula_alpha,log_ula_mass,ula_theta)
 
 
 
@@ -172,15 +157,13 @@ if Model_control == 3:
 
 	#n,betaK,betaM,a0,b0,phi_range = functions.matrix_theory_hyperpriors(distributions,10,[1,1,1],[1,1,1],[1,1,1],[1,1,1],np.phi)
 	accuracy = 100
-	n,betaK,betaM,a0,b0,accuracy,phi_range = 1.0,1.0,0.1,0.1,20,100,3.14159265359
-
+	hyperprior_vector = [20,1.0,1.0,0.1,0.1,3.14159265359]
+	hyperparameters = functions.hyperpriors(distributions, hyperprior_vector)
 	#######################################################################################################################
 	############## Dependant Analysis
 	#######################################################################################################################
-	lma_array, lf_array, biglistphi = 	functions.spectra_matrix_theory(betaK,betaM,a0,b0,n,accuracy,phi_range)
-
-	xyz = np.vstack([lma_array, lf_array, biglistphi])
-	kde = stats.gaussian_kde(xyz,bw_method=0.075)
+	lma_array, lf_array, biglistphi, stack = functions.spectra_matrix_theory(hyperparameters,accuracy)
+	kde = stats.gaussian_kde(stack,bw_method=0.075)
 	#######################################################################################################################
 
 	#######################################################################################################################

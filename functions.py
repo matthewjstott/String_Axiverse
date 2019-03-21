@@ -108,122 +108,18 @@ def rmt_input():
 	return(spline1m,spline2m,spline3m,spline4m,spline1f,spline2f,spline3f,spline4f,spline1p,spline2p,spline3p,spline4p)
 
 
-def mtheory_hyperpriors(distributions,n_vec,beta_vec,a0_vec,sa_vec,b0_vec,sb_vec,F_vec,lambda_vec,smin_vec,smax_vec,Ntildemax_vec):
-	
-	if isinstance(n_vec,(list,)):
-		dis, *vec = n_vec
-		n = getattr(rd, distributions[dis])(*vec)
-	else:
-		n = n_vec
-	if isinstance(beta_vec,(list,)):
-		dis, *vec = beta_vec
-		beta = getattr(rd, distributions[dis])(*vec)
-	else:
-		beta = beta_vec
-	if isinstance(a0_vec,(list,)):
-		dis, *vec = a0_vec
-		a0 = getattr(rd, distributions[dis])(*vec)
-	else:
-		a0 = a0_vec
-	if isinstance(sa_vec,(list,)):
-		dis, *vec = sa_vec
-		sa = getattr(rd, distributions[dis])(*vec)
-	else:
-		sa = sa_vec	
-	if isinstance(b0_vec,(list,)):
-		dis, *vec = b0_vec
-		b0 = getattr(rd, distributions[dis])(*vec)
-	else:
-		b0 = b0_vec
-	if isinstance(sb_vec,(list,)):
-		dis, *vec = sb_vec
-		sb = getattr(rd, distributions[dis])(*vec)
-	else:
-		sb = sb_vec
-	if isinstance(F_vec,(list,)):
-		dis, *vec = F_vec
-		F = getattr(rd, distributions[dis])(*vec)
-	else:
-		F = F_vec
-	if isinstance(lambda_vec,(list,)):
-		dis, *vec = lambda_vec
-		lambda = getattr(rd, distributions[dis])(*vec)
-	else:
-		lambda = lambda_vec
-	if isinstance(smin_vec,(list,)):
-		dis, *vec = smin_vec
-		smin = getattr(rd, distributions[dis])(*vec)
-	else:
-		smin = smin_vec				
-	if isinstance(smax_vec,(list,)):
-		dis, *vec = smax_vec
-		smax = getattr(rd, distributions[dis])(*vec)
-	else:
-		smax = smax_vec			
-	if isinstance(Ntildemax_vec,(list,)):
-		dis, *vec = Ntildemax_vec
-		Ntildemax = getattr(rd, distributions[dis])(*vec)
-	else:
-		Ntildemax = Ntildemax_vec		
-	
-	return(n,beta,a0,sa,b0,sb,F,lambda,smin,smax,Ntildemax)
-	
+def hyperpriors(distributions,hyperprior_vector):
+	hyperparameter_vector=[]	
+	for i in range(len(hyperprior_vector)):	
+		if isinstance(hyperprior_vector[i],(list,)):
+			dis, *vec = hyperprior_vector[i]
+			hyperparameter_vector.append(getattr(rd, distributions[dis])(*vec))
+		else:
+			hyperparameter_vector.append(hyperprior_vector[i])	
+	print(hyperparameter_vector)		
+	return(hyperparameter_vector)
 
-def matrix_theory_hyperpriors(distributions,n_vec,beta_k_vec,beta_m_vec,a0_vec,b0_vec):	
-	if isinstance(n_vec,(list,)):
-		dis, *vec = n_vec
-		n = getattr(rd, distributions[dis])(*vec)
-	else:
-		n = n_vec
-	if isinstance(beta_k_vec,(list,)):
-		dis, *vec = beta_k_vec
-		beta_k = getattr(rd, distributions[dis])(*vec)
-	else:
-		beta_k = beta_k_vec
-	if isinstance(beta_m_vec,(list,)):
-		dis, *vec = beta_m_vec
-		beta_m = getattr(rd, distributions[dis])(*vec)
-	else:
-		beta_m = beta_m_vec
-	if isinstance(a0_vec,(list,)):
-		dis, *vec = a0_vec
-		a0 = getattr(rd, distributions[dis])(*vec)
-	else:
-		a0 = a0_vec
-	if isinstance(b0_vec,(list,)):
-		dis, *vec = b0_vec
-		b0 = getattr(rd, distributions[dis])(*vec)
-	else:
-		b0 = b0_vec	
-	
-	return(n,beta_k,beta_m,a0,b0)
-	
-def scale_invariant_hyperpriors(distributions,mass_low_vec,mass_high_vec,decay_low_vec,decay_high_vec,phi_range):	
-	if isinstance(mass_low_vec,(list,)):
-		dis, *vec = mass_low_vec
-		mass_low = getattr(rd, distributions[dis])(*vec)
-	else:
-		mass_low = mass_low_vec
-	if isinstance(mass_high_vec,(list,)):
-		dis, *vec = mass_high_vec
-		mass_high = getattr(rd, distributions[dis])(*vec)
-	else:
-		mass_high = mass_high_vec
-	if isinstance(decay_low_vec,(list,)):
-		dis, *vec = decay_low_vec
-		decay_low = getattr(rd, distributions[dis])(*vec)
-	else:
-		decay_low = decay_low_vec
-	if isinstance(decay_high_vec,(list,)):
-		dis, *vec = decay_high_vec
-		decay_high = getattr(rd, distributions[dis])(*vec)
-	else:
-		decay_high = decay_high_vec
-	
-	return(mass_low,mass_high,decay_low,decay_high,phi_range)	
-	
-	
-			
+				
 def gld_params(betaK,betaM,fun1,fun2,fun3,fun4,fun5,fun6,fun7,fun8,fun9,fun10,fun11,fun12):
 	
 	l1=fun1(betaK,betaM)
@@ -302,7 +198,10 @@ def marcenko_pastur_pdf(beta, a0, decay):
 	f_mp = interp1d(x_space, mp, kind='linear')
 	return  (f_mp)
 
-def diag_matrix_theory(betaK,betaM,a0,b0,n):
+def diag_matrix_theory(hyperparameters):
+	n,betaK,betaM,a0,b0,phi_range = hyperparameters
+	
+	print(betaK)
 	
 	LK=int(n/betaK)
 	LM=int(n/betaM)
@@ -326,7 +225,7 @@ def diag_matrix_theory(betaK,betaM,a0,b0,n):
 	return(ma_array, fef, mv, ev)
 
 
-def spectra_matrix_theory(betaK,betaM,a0,b0,n,accuracy,phi_range): 
+def spectra_matrix_theory(hyperparameters,accuracy): 
 	biglistm = []
 	biglistf = []
 	biglistf2 = []
@@ -339,8 +238,8 @@ def spectra_matrix_theory(betaK,betaM,a0,b0,n,accuracy,phi_range):
 		print(count)
 		flag = 0
 		totalcount = totalcount+1
-		ma_array, fef, mv, ev= diag_matrix_theory(betaK,betaM,a0,b0,n)
-		phiin_array = phi_array(fef, n, phi_range, mv)
+		ma_array, fef, mv, ev= diag_matrix_theory(hyperparameters)
+		phiin_array = phi_array(fef, hyperparameters[0], hyperparameters[-1], mv)
 		
 		if flag == 0:
 			count = count + 1
@@ -349,11 +248,13 @@ def spectra_matrix_theory(betaK,betaM,a0,b0,n,accuracy,phi_range):
 			biglistphi = np.concatenate((biglistphi,phiin_array))
 	lma_array = np.log10(biglistm)
 	lf_array = np.log10(biglistf)	
-	return(lma_array, lf_array, biglistphi)		
+	stack = np.vstack([lma_array, lf_array, biglistphi])
+	return(lma_array, lf_array, biglistphi,stack)		
 			
 	
 
-def diag_mtheory(n,beta,a0,sa,b0,sb,F,Lambda,smin,smax,Ntildemax):
+def diag_mtheory(hyperparameters):
+	n,beta,a0,sa,b0,sb,F,Lambda,smin,smax,Ntildemax,phi_range = hyperparameters
 	s = np.random.uniform(smin,smax,n)
 	k = np.zeros((n,n))
 	np.fill_diagonal(k,a0*a0/s/s)
@@ -392,7 +293,7 @@ def phi_array(fef,n,phi_range,mv):
 	return(phiin_array)
 
 
-def spectra(n,beta,a0,sa,b0,sb,F,Lambda,smin,smax,Ntildemax,phi_range,accuracy):
+def spectra(hyperparameters,accuracy):
 	biglistm = []
 	biglistf = []
 	biglistphi = []
@@ -405,8 +306,8 @@ def spectra(n,beta,a0,sa,b0,sb,F,Lambda,smin,smax,Ntildemax,phi_range,accuracy):
 		print(count)
 		flag = 0
 		totalcount = totalcount+1
-		ma_array, fef, mv, vol = diag_mtheory(n,beta,a0,sa,b0,sb,F,Lambda,smin,smax,Ntildemax)
-		phiin_array = phi_array(fef, n, phi_range, mv)
+		ma_array, fef, mv, vol = diag_mtheory(hyperparameters )
+		phiin_array = phi_array(fef, hyperparameters[0], hyperparameters[-1], mv)
 		#if flag == 0 and any(x < 30 and x > 20 for x in vol):
 		if flag == 0:
 			count = count + 1
